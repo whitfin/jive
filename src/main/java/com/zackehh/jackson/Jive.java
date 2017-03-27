@@ -25,6 +25,7 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -91,7 +92,7 @@ public class Jive {
      * @return a newly populated ArrayNode instance.
      */
     public static ArrayNode newArrayNode(JsonNode... nodes) {
-        return Arrays.stream(nodes).collect(toArrayNode());
+        return arrayCollect(Arrays.stream(nodes));
     }
 
     /**
@@ -374,7 +375,7 @@ public class Jive {
      */
     @SafeVarargs
     public static ObjectNode newObjectNode(Map.Entry<String, JsonNode>... entries) {
-        return Arrays.stream(entries).collect(toObjectNode());
+        return objectCollect(Arrays.stream(entries));
     }
 
     /**
@@ -401,6 +402,56 @@ public class Jive {
      */
     public static Stream<Map.Entry<String, JsonNode>> stream(ObjectNode node) {
         return StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) node::fields).spliterator(), false);
+    }
+
+    /**
+     * Transforms a provided ArrayNode into a new ArrayNode instance.
+     *
+     * The provided Function maps the base Stream to a new Stream in
+     * order to transform the ArrayNode internally. The final nodes
+     * are collected back into a new ArrayNode.
+     *
+     * @param node the ArrayNode to transform.
+     * @param transformer the Stream transformer.
+     * @return a new ArrayNode instance after transformation.
+     */
+    public static ArrayNode transform(ArrayNode node, Function<Stream<JsonNode>, Stream<JsonNode>> transformer) {
+        return arrayCollect(transformer.apply(stream(node)));
+    }
+
+    /**
+     * Transforms a provided ObjectNode into a new ObjectNode instance.
+     *
+     * The provided Function maps the base Stream to a new Stream in
+     * order to transform the ObjectNode internally. The final entry
+     * pairs are collected back into a new ObjectNode.
+     *
+     * @param node the ObjectNode to transform.
+     * @param transformer the Stream transformer.
+     * @return a new ObjectNode instance after transformation.
+     */
+    public static ObjectNode transform(ObjectNode node, Function<Stream<Map.Entry<String, JsonNode>>, Stream<Map.Entry<String, JsonNode>>> transformer) {
+        return objectCollect(transformer.apply(stream(node)));
+    }
+
+    /**
+     * Collects a provided JsonNode Stream into an ArrayNode.
+     *
+     * @param stream the Stream instance to collect.
+     * @return a new ArrayNode after collection.
+     */
+    private static ArrayNode arrayCollect(Stream<JsonNode> stream) {
+        return stream.collect(toArrayNode());
+    }
+
+    /**
+     * Collects a provided entry Stream into an ObjectNode.
+     *
+     * @param stream the Stream instance to collect.
+     * @return a new ObjectNode after collection.
+     */
+    private static ObjectNode objectCollect(Stream<Map.Entry<String, JsonNode>> stream) {
+        return stream.collect(toObjectNode());
     }
 
 }
