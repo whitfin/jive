@@ -2,20 +2,7 @@ package com.zackehh.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BigIntegerNode;
-import com.fasterxml.jackson.databind.node.BinaryNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DecimalNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.FloatNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.LongNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.POJONode;
-import com.fasterxml.jackson.databind.node.ShortNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.node.*;
 import com.zackehh.jackson.scope.SafeExecution;
 
 import java.io.IOException;
@@ -50,6 +37,33 @@ public class Jive {
     private Jive() { }
 
     /**
+     * Concatenates multiple ArrayNode instances.
+     *
+     * The returned value is a new ArrayNode instance, rather than
+     * modifying one of the input instances.
+     *
+     * @param nodes the ArrayNode instances to concatenate.
+     * @return a new ArrayNode instance of all provided nodes.
+     */
+    public static ArrayNode concat(ArrayNode... nodes) {
+        return arrayCollect(Arrays.stream(nodes).flatMap(Jive::stream));
+    }
+
+    /**
+     * Returns a new ArrayNode with the first N items removed.
+     *
+     * This does not modify the original ArrayNode input, but
+     * returns a new ArrayNode instance with the nodes added.
+     *
+     * @param node the node to drop from.
+     * @param count the number of nodes to drop.
+     * @return a new ArrayNode instance with dropped nodes.
+     */
+    public static ArrayNode drop(ArrayNode node, int count) {
+        return transform(node, s -> s.skip(count));
+    }
+
+    /**
      * Executes a scoped function with the provided ObjectMapper.
      *
      * Any thrown IOException instances will be caught and will
@@ -71,6 +85,19 @@ public class Jive {
         } catch(IOException e) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * Retrieves the last value in an ArrayNode.
+     *
+     * If the ArrayNode is empty, a MissingNode instance
+     * will be returned.
+     *
+     * @param node a new ArrayNode instance.
+     * @return a JsonNode instance.
+     */
+    public static JsonNode last(ArrayNode node) {
+        return node.path(node.size() - 1);
     }
 
     /**
@@ -379,6 +406,17 @@ public class Jive {
     }
 
     /**
+     * Removes and returns the last value in an ArrayNode.
+     *
+     * @param node an ArrayNode instance.
+     * @return a JsonNode value.
+     */
+    public static JsonNode pop(ArrayNode node) {
+        JsonNode pop = node.remove(node.size() - 1);
+        return pop == null ? MissingNode.getInstance() : pop;
+    }
+
+    /**
      * Creates a new Stream from the provided ArrayNode.
      *
      * The Stream is created as a serial Stream so that the caller may
@@ -402,6 +440,21 @@ public class Jive {
      */
     public static Stream<Map.Entry<String, JsonNode>> stream(ObjectNode node) {
         return StreamSupport.stream(((Iterable<Map.Entry<String, JsonNode>>) node::fields).spliterator(), false);
+    }
+
+    /**
+     * Returns a new ArrayNode containing N taken items from a provided
+     * ArrayNode instance.
+     *
+     * This does not modify the original ArrayNode input, but
+     * returns a new ArrayNode instance with the nodes taken.
+     *
+     * @param node the node to take from.
+     * @param count the number of nodes to take.
+     * @return a new ArrayNode instance fo the taken nodes.
+     */
+    public static ArrayNode take(ArrayNode node, int count) {
+        return transform(node, s -> s.limit(count));
     }
 
     /**
@@ -432,6 +485,17 @@ public class Jive {
      */
     public static ObjectNode transform(ObjectNode node, Function<Stream<Map.Entry<String, JsonNode>>, Stream<Map.Entry<String, JsonNode>>> transformer) {
         return objectCollect(transformer.apply(stream(node)));
+    }
+
+    /**
+     * Returns an ArrayNode instance with all duplicate values
+     * removed.
+     *
+     * @param node the input ArrayNode to uniq.
+     * @return a new ArrayNode of unique instance.
+     */
+    public static ArrayNode uniq(ArrayNode node) {
+        return transform(node, Stream::distinct);
     }
 
     /**

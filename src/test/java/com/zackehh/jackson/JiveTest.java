@@ -2,21 +2,7 @@ package com.zackehh.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BigIntegerNode;
-import com.fasterxml.jackson.databind.node.BinaryNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DecimalNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.FloatNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.LongNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.POJONode;
-import com.fasterxml.jackson.databind.node.ShortNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.zackehh.jackson.stream.JiveCollectors;
+import com.fasterxml.jackson.databind.node.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -32,6 +18,41 @@ import java.util.Optional;
 public class JiveTest {
 
     @Test
+    public void testConcat() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3);
+
+        ArrayNode arr2 = arrayNode()
+                .add(4).add(5).add(6);
+
+        ArrayNode arr3 = Jive.concat(arr1);
+        ArrayNode arr4 = Jive.concat(arr1, arr2);
+        ArrayNode arr5 = Jive.concat(arr2, arr1);
+
+        Assert.assertEquals(arr3, arr1);
+        Assert.assertEquals(arr4, arrayNode().addAll(arr1).addAll(arr2));
+        Assert.assertEquals(arr5, arrayNode().addAll(arr2).addAll(arr1));
+    }
+
+    @Test
+    public void testDrop() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3);
+
+        ArrayNode arr2 = arrayNode();
+
+        ArrayNode arr3 = Jive.drop(arr1, 0);
+        ArrayNode arr4 = Jive.drop(arr1, 2);
+        ArrayNode arr5 = Jive.drop(arr2, 0);
+        ArrayNode arr6 = Jive.drop(arr2, 2);
+
+        Assert.assertEquals(arr3, arr1);
+        Assert.assertEquals(arr4, arrayNode().add(3));
+        Assert.assertEquals(arr5, arr2);
+        Assert.assertEquals(arr6, arr2);
+    }
+
+    @Test
     public void testExecute() {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -45,6 +66,20 @@ public class JiveTest {
         Assert.assertFalse(res2.isPresent());
         Assert.assertFalse(res3.isPresent());
         Assert.assertEquals(res1.orElse(null), mapper.createObjectNode());
+    }
+
+    @Test
+    public void testLast() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3);
+
+        ArrayNode arr2 = arrayNode();
+
+        JsonNode node1 = Jive.last(arr1);
+        JsonNode node2 = Jive.last(arr2);
+
+        Assert.assertEquals(node1, IntNode.valueOf(3));
+        Assert.assertEquals(node2, MissingNode.getInstance());
     }
 
     @Test
@@ -68,11 +103,11 @@ public class JiveTest {
     public void testNewIterator() {
         Iterable<JsonNode> arr1 = Jive.newIterable(null);
         Iterable<JsonNode> arr2 = Jive.newIterable(TextNode.valueOf("test"));
-        Iterable<JsonNode> arr3 = Jive.newIterable(JsonNodeFactory.instance.arrayNode().add(BooleanNode.getTrue()));
+        Iterable<JsonNode> arr3 = Jive.newIterable(arrayNode().add(BooleanNode.getTrue()));
 
-        Assert.assertEquals(arr1, JsonNodeFactory.instance.arrayNode());
-        Assert.assertEquals(arr2, JsonNodeFactory.instance.arrayNode().add(TextNode.valueOf("test")));
-        Assert.assertEquals(arr3, JsonNodeFactory.instance.arrayNode().add(BooleanNode.getTrue()));
+        Assert.assertEquals(arr1, arrayNode());
+        Assert.assertEquals(arr2, arrayNode().add(TextNode.valueOf("test")));
+        Assert.assertEquals(arr3, arrayNode().add(BooleanNode.getTrue()));
     }
 
     @Test
@@ -177,33 +212,56 @@ public class JiveTest {
     }
 
     @Test
-    public void testStreamArrayNode() {
-        ArrayNode arr1 = JsonNodeFactory.instance.arrayNode()
-            .add(1)
-            .add(2)
-            .add(3);
+    public void testPop() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3);
 
-        ArrayNode arr2 = Jive
-            .stream(arr1)
-            .limit(1)
-            .collect(JiveCollectors.toArrayNode());
+        ArrayNode arr2 = arrayNode();
 
-        Assert.assertEquals(arr2, JsonNodeFactory.instance.arrayNode().add(1));
+        JsonNode node1 = Jive.pop(arr1);
+        JsonNode node2 = Jive.pop(arr2);
+
+        Assert.assertEquals(arr1.size(), 2);
+        Assert.assertEquals(arr2.size(), 0);
+
+        Assert.assertEquals(node1, IntNode.valueOf(3));
+        Assert.assertEquals(node2, MissingNode.getInstance());
     }
 
     @Test
-    public void testStreamObjectNode() {
-        ObjectNode obj1 = JsonNodeFactory.instance.objectNode()
-            .put("key1", 1)
-            .put("key2", 2)
-            .put("key3", 3);
+    public void testTake() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3);
 
-        ObjectNode obj2 = Jive
-            .stream(obj1)
-            .limit(1)
-            .collect(JiveCollectors.toObjectNode());
+        ArrayNode arr2 = arrayNode();
 
-        Assert.assertEquals(obj2, JsonNodeFactory.instance.objectNode().put("key1", 1));
+        ArrayNode arr3 = Jive.take(arr1, 0);
+        ArrayNode arr4 = Jive.take(arr1, 2);
+        ArrayNode arr5 = Jive.take(arr2, 0);
+        ArrayNode arr6 = Jive.take(arr2, 2);
+
+        Assert.assertEquals(arr3, arrayNode());
+        Assert.assertEquals(arr4, arrayNode().add(1).add(2));
+        Assert.assertEquals(arr5, arrayNode());
+        Assert.assertEquals(arr6, arrayNode());
+    }
+
+    @Test
+    public void testUniq() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3).add(2);
+
+        ArrayNode arr2 = arrayNode();
+
+        ArrayNode arr3 = Jive.uniq(arr1);
+        ArrayNode arr4 = Jive.uniq(arr2);
+
+        Assert.assertEquals(arr3, arrayNode().add(1).add(2).add(3));
+        Assert.assertEquals(arr4, arrayNode());
+    }
+
+    private ArrayNode arrayNode() {
+        return JsonNodeFactory.instance.arrayNode();
     }
 
 }
