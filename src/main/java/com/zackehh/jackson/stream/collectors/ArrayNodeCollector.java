@@ -24,8 +24,6 @@ public class ArrayNodeCollector implements Collector<JsonNode, ArrayNode, ArrayN
     /**
      * Simply returns a Supplier which creates a new empty ArrayNode instance
      * in order to collect JsonNode values into.
-     *
-     * @inheritDoc
      */
     @Override
     public Supplier<ArrayNode> supplier() {
@@ -35,8 +33,6 @@ public class ArrayNodeCollector implements Collector<JsonNode, ArrayNode, ArrayN
     /**
      * Returns a BiConsumer which adds a pre-created JsonNode into the ArrayNode
      * instance provided by the Supplier.
-     *
-     * @inheritDoc
      */
     @Override
     public BiConsumer<ArrayNode, JsonNode> accumulator() {
@@ -46,8 +42,6 @@ public class ArrayNodeCollector implements Collector<JsonNode, ArrayNode, ArrayN
     /**
      * Returns an operator which combines two ArrayNode instances by adding all
      * JsonNode values from the right instance into the left instance.
-     *
-     * @inheritDoc
      */
     @Override
     public BinaryOperator<ArrayNode> combiner() {
@@ -58,8 +52,6 @@ public class ArrayNodeCollector implements Collector<JsonNode, ArrayNode, ArrayN
      * Returns a Function to identify the input.
      *
      * This is moot and not called due to the provided Characteristics.
-     *
-     * @inheritDoc
      */
     @Override
     public Function<ArrayNode, ArrayNode> finisher() {
@@ -69,8 +61,6 @@ public class ArrayNodeCollector implements Collector<JsonNode, ArrayNode, ArrayN
     /**
      * Returns a Set of Characteristics to apply to this Collector. The only one
      * provided is that there's an identity finisher, in order to remove the call.
-     *
-     * @inheritDoc
      */
     @Override
     public Set<Characteristics> characteristics() {

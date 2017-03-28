@@ -20,7 +20,7 @@ public interface SafeExecution<T> {
      *
      * @param mapper an ObjectMapper instance to use in scope.
      * @return an instance of the defined custom type.
-     * @throws IOException
+     * @throws IOException if an error occurs in the Jackson operation.
      */
     T apply(ObjectMapper mapper) throws IOException;
 }

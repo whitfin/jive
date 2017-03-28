@@ -26,8 +26,6 @@ public class ObjectNodeCollector implements Collector<Map.Entry<String, JsonNode
     /**
      * Simply returns a Supplier which creates a new empty ObjectNode
      * instance in order to collect JsonNode values into.
-     *
-     * @inheritDoc
      */
     @Override
     public Supplier<ObjectNode> supplier() {
@@ -37,8 +35,6 @@ public class ObjectNodeCollector implements Collector<Map.Entry<String, JsonNode
     /**
      * Returns a BiConsumer which adds a pre-created JsonNode into the ObjectNode
      * instance provided by the Supplier.
-     *
-     * @inheritDoc
      */
     @Override
     public BiConsumer<ObjectNode, Map.Entry<String, JsonNode>> accumulator() {
@@ -51,8 +47,6 @@ public class ObjectNodeCollector implements Collector<Map.Entry<String, JsonNode
      *
      * This will overwrite any entries in the left with the same key as an entry
      * in the right instance.
-     *
-     * @inheritDoc
      */
     @Override
     public BinaryOperator<ObjectNode> combiner() {
@@ -70,8 +64,6 @@ public class ObjectNodeCollector implements Collector<Map.Entry<String, JsonNode
      * Returns a Function to identify the input.
      *
      * This is moot and not called due to the provided Characteristics.
-     *
-     * @inheritDoc
      */
     @Override
     public Function<ObjectNode, ObjectNode> finisher() {
@@ -82,8 +74,6 @@ public class ObjectNodeCollector implements Collector<Map.Entry<String, JsonNode
      * Returns a Set of Characteristics to apply to this Collector. The only ones
      * provided are that there's an identity finisher and that there is not specific
      * order of the incoming pairs.
-     *
-     * @inheritDoc
      */
     @Override
     public Set<Characteristics> characteristics() {
