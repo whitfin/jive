@@ -12,7 +12,7 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -47,6 +47,29 @@ public class Jive {
      */
     public static ArrayNode concat(ArrayNode... nodes) {
         return arrayCollect(Arrays.stream(nodes).flatMap(Jive::stream));
+    }
+
+    /**
+     * Determines whether a JsonNode exists in an ArrayNode.
+     *
+     * @param node the ArrayNode to search within.
+     * @param value the JsonNode value to search for.
+     * @return true if the JsonNode value can be found.
+     */
+    public static boolean contains(ArrayNode node, JsonNode value) {
+        return some(node, e -> e.equals(value));
+    }
+
+    /**
+     * Determines whether a JsonNode exists in an ObjectNode as
+     * a value entry.
+     *
+     * @param node the ObjectNode to search within.
+     * @param value the JsonNode value to search for.
+     * @return true if the JsonNode value can be found.
+     */
+    public static boolean contains(ObjectNode node, JsonNode value) {
+        return some(node, e -> e.getValue().equals(value));
     }
 
     /**
@@ -88,6 +111,80 @@ public class Jive {
     }
 
     /**
+     * Determines whether all JsonNodes within an ArrayNode fit
+     * a provided Predicate condition.
+     *
+     * @param node the ArrayNode to iterate through.
+     * @param predicate the condition to verify matches against.
+     * @return true if every JsonNode value matches the Predicate.
+     */
+    public static boolean every(ArrayNode node, Predicate<JsonNode> predicate) {
+        return stream(node).allMatch(predicate);
+    }
+
+    /**
+     * Determines whether all entries within an ObjectNode fit
+     * a provided Predicate condition.
+     *
+     * @param node the ObjectNode to iterate through.
+     * @param predicate the condition to verify matches against.
+     * @return true if every entry value matches the Predicate.
+     */
+    public static boolean every(ObjectNode node, Predicate<Map.Entry<String, JsonNode>> predicate) {
+        return stream(node).allMatch(predicate);
+    }
+
+    /**
+     * Filters values in an ArrayNode into a new ArrayNode.
+     *
+     * This does not modify the input ArrayNode but collects
+     * the filtered values into a new ArrayNode instance.
+     *
+     * @param node the ArrayNode to filter through.
+     * @param predicate the condition used to filter values.
+     * @return an ArrayNode instance containing filtered values.
+     */
+    public static ArrayNode filter(ArrayNode node, Predicate<JsonNode> predicate) {
+        return transform(node, s -> s.filter(predicate));
+    }
+
+    /**
+     * Filters values in an ObjectNode into a new ObjectNode.
+     *
+     * This does not modify the input ObjectNode but collects
+     * the filtered values into a new ObjectNode instance.
+     *
+     * @param node the ObjectNode to filter through.
+     * @param predicate the condition used to filter values.
+     * @return an ObjectNode instance containing filtered values.
+     */
+    public static ObjectNode filter(ObjectNode node, Predicate<Map.Entry<String, JsonNode>> predicate) {
+        return transform(node, s -> s.filter(predicate));
+    }
+
+    /**
+     * Attempts to find an ArrayNode value matching a criteria.
+     *
+     * @param node the ArrayNode to search.
+     * @param predicate the condition to match the values against.
+     * @return a potential JsonNode matching the predicate.
+     */
+    public static Optional<JsonNode> find(ArrayNode node, Predicate<JsonNode> predicate) {
+        return stream(node).filter(predicate).findFirst();
+    }
+
+    /**
+     * Attempts to find an ObjectNode entry matching a criteria.
+     *
+     * @param node the ObjectNode to search.
+     * @param predicate the condition to match the entries against.
+     * @return a potential Map.Entry matching the predicate.
+     */
+    public static Optional<Map.Entry<String, JsonNode>> find(ObjectNode node, Predicate<Map.Entry<String, JsonNode>> predicate) {
+        return stream(node).filter(predicate).findFirst();
+    }
+
+    /**
      * Retrieves the last value in an ArrayNode.
      *
      * If the ArrayNode is empty, a MissingNode instance
@@ -98,6 +195,34 @@ public class Jive {
      */
     public static JsonNode last(ArrayNode node) {
         return node.path(node.size() - 1);
+    }
+
+    /**
+     * Maps values in an ArrayNode into a new ArrayNode.
+     *
+     * This does not modify the original ArrayNode, rather
+     * it collects the mapped values into a new ArrayNode.
+     *
+     * @param node the ArrayNode to map.
+     * @param function the mapping function.
+     * @return an ArrayNode containing the mapped values.
+     */
+    public static ArrayNode map(ArrayNode node, Function<JsonNode, JsonNode> function) {
+        return transform(node, s -> s.map(function));
+    }
+
+    /**
+     * Maps entries in an ObjectNode into a new ObjectNode.
+     *
+     * This does not modify the original ObjectNode, rather
+     * it collects the mapped entries into a new ObjectNode.
+     *
+     * @param node the ObjectNode to map.
+     * @param function the mapping function.
+     * @return an ObjectNode containing the mapped values.
+     */
+    public static ObjectNode map(ObjectNode node, Function<Map.Entry<String, JsonNode>, Map.Entry<String, JsonNode>> function) {
+        return transform(node, s -> s.map(function));
     }
 
     /**
@@ -406,14 +531,113 @@ public class Jive {
     }
 
     /**
-     * Removes and returns the last value in an ArrayNode.
+     * Returns true if no values in the ArrayNode match the
+     * provided predicate.
      *
-     * @param node an ArrayNode instance.
-     * @return a JsonNode value.
+     * @param node the ArrayNode to verify.
+     * @param predicate the condition to match against.
+     * @return true if no values match the condition.
      */
-    public static JsonNode pop(ArrayNode node) {
-        JsonNode pop = node.remove(node.size() - 1);
-        return pop == null ? MissingNode.getInstance() : pop;
+    public static boolean none(ArrayNode node, Predicate<JsonNode> predicate) {
+        return !some(node, predicate);
+    }
+
+    /**
+     * Returns true if no entries in the ObjectNode match the
+     * provided predicate.
+     *
+     * @param node the ObjectNode to verify.
+     * @param predicate the condition to match against.
+     * @return true if no entries match the condition.
+     */
+    public static boolean none(ObjectNode node, Predicate<Map.Entry<String, JsonNode>> predicate) {
+        return !some(node, predicate);
+    }
+
+    /**
+     * Reduces an ArrayNode into a single value of type T using
+     * the provided function to accumulate values.
+     *
+     * @param node the ArrayNode to reduce.
+     * @param initial the initial accumulator state.
+     * @param function the reducing function.
+     * @param <T> the type of the result.
+     * @return a new instance of type T.
+     */
+    public static <T> T reduce(ArrayNode node, T initial, BiFunction<T, JsonNode, T> function) {
+        return stream(node).reduce(initial, function, (l, r) -> r);
+    }
+
+    /**
+     * Reduces an ObjectNode into a single value of type T using
+     * the provided function to accumulate values.
+     *
+     * @param node the ObjectNode to reduce.
+     * @param initial the initial accumulator state.
+     * @param function the reducing function.
+     * @param <T> the type of the result.
+     * @return a new instance of type T.
+     */
+    public static <T> T reduce(ObjectNode node, T initial, BiFunction<T, Map.Entry<String, JsonNode>, T> function) {
+        return stream(node).reduce(initial, function, (l, r) -> r);
+    }
+
+    /**
+     * Filters values in an ArrayNode into a new ArrayNode.
+     *
+     * This does not modify the input ArrayNode but collects
+     * the filtered values into a new ArrayNode instance.
+     *
+     * Unlike {@link #filter(ArrayNode, Predicate)} this method
+     * filters out values rather than filtering them in.
+     *
+     * @param node the ArrayNode to filter through.
+     * @param predicate the condition used to filter values.
+     * @return an ArrayNode instance containing filtered values.
+     */
+    public static ArrayNode reject(ArrayNode node, Predicate<JsonNode> predicate) {
+        return transform(node, s -> s.filter(e -> !predicate.test(e)));
+    }
+
+    /**
+     * Filters values in an ObjectNode into a new ObjectNode.
+     *
+     * This does not modify the input ObjectNode but collects
+     * the filtered values into a new ObjectNode instance.
+     *
+     * Unlike {@link #filter(ObjectNode, Predicate)} this method
+     * filters out values rather than filtering them in.
+     *
+     * @param node the ObjectNode to filter through.
+     * @param predicate the condition used to filter values.
+     * @return an ObjectNode instance containing filtered values.
+     */
+    public static ObjectNode reject(ObjectNode node, Predicate<Map.Entry<String, JsonNode>> predicate) {
+        return transform(node, s -> s.filter(e -> !predicate.test(e)));
+    }
+
+    /**
+     * Returns true if some values in the ArrayNode match the
+     * provided predicate.
+     *
+     * @param node the ArrayNode to verify.
+     * @param predicate the condition to match against.
+     * @return true if some values match the condition.
+     */
+    public static boolean some(ArrayNode node, Predicate<JsonNode> predicate) {
+        return stream(node).anyMatch(predicate);
+    }
+
+    /**
+     * Returns true if some entries in the ObjectNode match the
+     * provided predicate.
+     *
+     * @param node the ObjectNode to verify.
+     * @param predicate the condition to match against.
+     * @return true if some entries match the condition.
+     */
+    public static boolean some(ObjectNode node, Predicate<Map.Entry<String, JsonNode>> predicate) {
+        return stream(node).anyMatch(predicate);
     }
 
     /**

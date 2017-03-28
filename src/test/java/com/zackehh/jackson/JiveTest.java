@@ -14,6 +14,7 @@ import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class JiveTest {
 
@@ -35,6 +36,32 @@ public class JiveTest {
     }
 
     @Test
+    public void testContainsArrayNode() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3);
+
+        Boolean result1 = Jive.contains(arr1, IntNode.valueOf(2));
+        Boolean result2 = Jive.contains(arr1, TextNode.valueOf("2"));
+
+        Assert.assertTrue(result1);
+        Assert.assertFalse(result2);
+    }
+
+    @Test
+    public void testContainsObjectNode() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3);
+
+        Boolean result1 = Jive.contains(obj1, IntNode.valueOf(2));
+        Boolean result2 = Jive.contains(obj1, TextNode.valueOf("2"));
+
+        Assert.assertTrue(result1);
+        Assert.assertFalse(result2);
+    }
+
+    @Test
     public void testDrop() {
         ArrayNode arr1 = arrayNode()
                 .add(1).add(2).add(3);
@@ -50,6 +77,34 @@ public class JiveTest {
         Assert.assertEquals(arr4, arrayNode().add(3));
         Assert.assertEquals(arr5, arr2);
         Assert.assertEquals(arr6, arr2);
+    }
+
+    @Test
+    public void testEveryArrayNode() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3).add("4").add("5");
+
+        Boolean result1 = Jive.every(arr1, JsonNode::isNumber);
+        Boolean result2 = Jive.every(arr1, jsonNode -> !jsonNode.isMissingNode());
+
+        Assert.assertFalse(result1);
+        Assert.assertTrue(result2);
+    }
+
+    @Test
+    public void testEveryObjectNode() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3)
+                .put("key4", "4")
+                .put("key5", "5");
+
+        Boolean result1 = Jive.every(obj1, stringJsonNodeEntry -> stringJsonNodeEntry.getValue().isNumber());
+        Boolean result2 = Jive.every(obj1, stringJsonNodeEntry -> !stringJsonNodeEntry.getValue().isMissingNode());
+
+        Assert.assertFalse(result1);
+        Assert.assertTrue(result2);
     }
 
     @Test
@@ -69,6 +124,70 @@ public class JiveTest {
     }
 
     @Test
+    public void testFilterArrayNode() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3).add("4").add("5");
+
+        ArrayNode arr2 = Jive.filter(arr1, JsonNode::isNumber);
+
+        ArrayNode arr3 = arrayNode()
+                .add(1).add(2).add(3);
+
+        Assert.assertEquals(arr2, arr3);
+    }
+
+    @Test
+    public void testFilterObjectNode() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3)
+                .put("key4", "4")
+                .put("key5", "5");
+
+        ObjectNode obj2 = Jive.filter(obj1, jsonNodeEntry -> jsonNodeEntry.getValue().isNumber());
+
+        ObjectNode obj3 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3);
+
+        Assert.assertEquals(obj2, obj3);
+    }
+
+    @Test
+    public void testFindArrayNode() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3).add("4").add("5");
+
+        Optional<JsonNode> node1 = Jive.find(arr1, JsonNode::isTextual);
+        Optional<JsonNode> node2 = Jive.find(arr1, JsonNode::isArray);
+
+        Assert.assertTrue(node1.isPresent());
+        Assert.assertFalse(node2.isPresent());
+
+        Assert.assertEquals(node1.orElse(null), TextNode.valueOf("4"));
+    }
+
+    @Test
+    public void testFindObjectNode() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3)
+                .put("key4", "4")
+                .put("key5", "5");
+
+        Optional<Map.Entry<String, JsonNode>> node1 = Jive.find(obj1, jsonNodeEntry -> jsonNodeEntry.getValue().isTextual());
+        Optional<Map.Entry<String, JsonNode>> node2 = Jive.find(obj1, jsonNodeEntry -> jsonNodeEntry.getValue().isArray());
+
+        Assert.assertTrue(node1.isPresent());
+        Assert.assertFalse(node2.isPresent());
+
+        Assert.assertEquals(node1.orElse(null), new AbstractMap.SimpleEntry<String, JsonNode>("key4", TextNode.valueOf("4")));
+    }
+
+    @Test
     public void testLast() {
         ArrayNode arr1 = arrayNode()
                 .add(1).add(2).add(3);
@@ -80,6 +199,39 @@ public class JiveTest {
 
         Assert.assertEquals(node1, IntNode.valueOf(3));
         Assert.assertEquals(node2, MissingNode.getInstance());
+    }
+
+    @Test
+    public void testMapArrayNode() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3);
+
+        ArrayNode arr2 = Jive.map(arr1, jsonNode -> TextNode.valueOf(jsonNode.asText()));
+
+        ArrayNode arr3 = arrayNode()
+                .add("1").add("2").add("3");
+
+        Assert.assertEquals(arr2, arr3);
+    }
+
+    @Test
+    public void testMapObjectNode() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3);
+
+        ObjectNode obj2 = Jive.map(obj1, jsonNodeEntry -> {
+            TextNode value = TextNode.valueOf(jsonNodeEntry.getValue().asText());
+            return new AbstractMap.SimpleEntry<>(jsonNodeEntry.getKey(), value);
+        });
+
+        ObjectNode obj3 = objectNode()
+                .put("key1", "1")
+                .put("key2", "2")
+                .put("key3", "3");
+
+        Assert.assertEquals(obj2, obj3);
     }
 
     @Test
@@ -212,20 +364,112 @@ public class JiveTest {
     }
 
     @Test
-    public void testPop() {
+    public void testNoneArrayNode() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3).add("4").add("5");
+
+        Boolean result1 = Jive.none(arr1, JsonNode::isNumber);
+        Boolean result2 = Jive.none(arr1, JsonNode::isMissingNode);
+
+        Assert.assertFalse(result1);
+        Assert.assertTrue(result2);
+    }
+
+    @Test
+    public void testNoneObjectNode() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3)
+                .put("key4", "4")
+                .put("key5", "5");
+
+        Boolean result1 = Jive.none(obj1, stringJsonNodeEntry -> stringJsonNodeEntry.getValue().isNumber());
+        Boolean result2 = Jive.none(obj1, stringJsonNodeEntry -> stringJsonNodeEntry.getValue().isMissingNode());
+
+        Assert.assertFalse(result1);
+        Assert.assertTrue(result2);
+    }
+
+    @Test
+    public void testReduceArrayNode() {
         ArrayNode arr1 = arrayNode()
                 .add(1).add(2).add(3);
 
-        ArrayNode arr2 = arrayNode();
+        int reduced = Jive.reduce(arr1, 0, (acc, node) -> acc + node.asInt(0));
 
-        JsonNode node1 = Jive.pop(arr1);
-        JsonNode node2 = Jive.pop(arr2);
+        Assert.assertEquals(reduced, 6);
+    }
 
-        Assert.assertEquals(arr1.size(), 2);
-        Assert.assertEquals(arr2.size(), 0);
+    @Test
+    public void testReduceObjectNode() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3);
 
-        Assert.assertEquals(node1, IntNode.valueOf(3));
-        Assert.assertEquals(node2, MissingNode.getInstance());
+        int reduced = Jive.reduce(obj1, 0, (acc, node) -> acc + node.getValue().asInt(0));
+
+        Assert.assertEquals(reduced, 6);
+    }
+
+    @Test
+    public void testRejectArrayNode() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3).add("4").add("5");
+
+        ArrayNode arr2 = Jive.reject(arr1, JsonNode::isNumber);
+
+        ArrayNode arr3 = arrayNode()
+                .add("4").add("5");
+
+        Assert.assertEquals(arr2, arr3);
+    }
+
+    @Test
+    public void testRejectObjectNode() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3)
+                .put("key4", "4")
+                .put("key5", "5");
+
+        ObjectNode obj2 = Jive.reject(obj1, jsonNodeEntry -> jsonNodeEntry.getValue().isNumber());
+
+        ObjectNode obj3 = objectNode()
+                .put("key4", "4")
+                .put("key5", "5");
+
+        Assert.assertEquals(obj2, obj3);
+    }
+
+    @Test
+    public void testSomeArrayNode() {
+        ArrayNode arr1 = arrayNode()
+                .add(1).add(2).add(3).add("4").add("5");
+
+        Boolean result1 = Jive.some(arr1, JsonNode::isNumber);
+        Boolean result2 = Jive.some(arr1, JsonNode::isMissingNode);
+
+        Assert.assertTrue(result1);
+        Assert.assertFalse(result2);
+    }
+
+    @Test
+    public void testSomeObjectNode() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3)
+                .put("key4", "4")
+                .put("key5", "5");
+
+        Boolean result1 = Jive.some(obj1, stringJsonNodeEntry -> stringJsonNodeEntry.getValue().isNumber());
+        Boolean result2 = Jive.some(obj1, stringJsonNodeEntry -> stringJsonNodeEntry.getValue().isMissingNode());
+
+        Assert.assertTrue(result1);
+        Assert.assertFalse(result2);
     }
 
     @Test
@@ -262,6 +506,10 @@ public class JiveTest {
 
     private ArrayNode arrayNode() {
         return JsonNodeFactory.instance.arrayNode();
+    }
+
+    private ObjectNode objectNode() {
+        return JsonNodeFactory.instance.objectNode();
     }
 
 }
