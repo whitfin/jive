@@ -3,3 +3,7 @@ jdk:
   - oraclejdk8
 script:
   - mvn clean test jacoco:report coveralls:report
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer

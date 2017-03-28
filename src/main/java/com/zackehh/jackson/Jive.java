@@ -547,7 +547,6 @@ public class Jive {
      * @param entries the entries to populate with.
      * @return a newly populated ObjectNode instance.
      */
-    @SafeVarargs
     public static ObjectNode newObjectNode(Map.Entry<String, JsonNode>... entries) {
         return objectCollect(Arrays.stream(entries));
     }
