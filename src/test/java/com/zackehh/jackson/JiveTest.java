@@ -7,12 +7,20 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class JiveTest {
+
+    @Test
+    public void testCreate() throws Exception {
+        Constructor c = Jive.class.getDeclaredConstructor();
+        c.setAccessible(true);
+        c.newInstance();
+    }
 
     @Test
     public void testConcat() {
