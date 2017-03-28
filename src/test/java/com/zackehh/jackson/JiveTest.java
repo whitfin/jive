@@ -10,11 +10,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.*;
 
 public class JiveTest {
 
@@ -188,6 +184,25 @@ public class JiveTest {
     }
 
     @Test
+    public void testKeys() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3)
+                .put("key4", "4")
+                .put("key5", "5");
+
+        Set<String> keys = Jive.keys(obj1);
+
+        Assert.assertEquals(keys.size(), 5);
+        Assert.assertTrue(keys.contains("key1"));
+        Assert.assertTrue(keys.contains("key2"));
+        Assert.assertTrue(keys.contains("key3"));
+        Assert.assertTrue(keys.contains("key4"));
+        Assert.assertTrue(keys.contains("key5"));
+    }
+
+    @Test
     public void testLast() {
         ArrayNode arr1 = arrayNode()
                 .add(1).add(2).add(3);
@@ -232,6 +247,46 @@ public class JiveTest {
                 .put("key3", "3");
 
         Assert.assertEquals(obj2, obj3);
+    }
+
+    @Test
+    public void testMerge() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", "1")
+                .put("key2", "2")
+                .put("key3", "3");
+
+        ObjectNode obj2 = objectNode()
+                .put("key3", 1)
+                .put("key4", 2)
+                .put("key5", 3);
+
+        ObjectNode obj3 = objectNode()
+                .put("key6", "!")
+                .put("key7", "@")
+                .put("key1", "#");
+
+        ObjectNode obj4 = Jive.merge(obj1);
+        ObjectNode obj5 = Jive.merge(obj1, obj2);
+        ObjectNode obj6 = Jive.merge(obj1, obj2, obj3);
+
+        Assert.assertEquals(obj4, obj1);
+
+        Assert.assertEquals(obj5.size(), 5);
+        Assert.assertEquals(obj5.path("key1"), TextNode.valueOf("1"));
+        Assert.assertEquals(obj5.path("key2"), TextNode.valueOf("2"));
+        Assert.assertEquals(obj5.path("key3"), IntNode.valueOf(1));
+        Assert.assertEquals(obj5.path("key4"), IntNode.valueOf(2));
+        Assert.assertEquals(obj5.path("key5"), IntNode.valueOf(3));
+
+        Assert.assertEquals(obj6.size(), 7);
+        Assert.assertEquals(obj6.path("key1"), TextNode.valueOf("#"));
+        Assert.assertEquals(obj6.path("key2"), TextNode.valueOf("2"));
+        Assert.assertEquals(obj6.path("key3"), IntNode.valueOf(1));
+        Assert.assertEquals(obj6.path("key4"), IntNode.valueOf(2));
+        Assert.assertEquals(obj6.path("key5"), IntNode.valueOf(3));
+        Assert.assertEquals(obj6.path("key6"), TextNode.valueOf("!"));
+        Assert.assertEquals(obj6.path("key6"), TextNode.valueOf("@"));
     }
 
     @Test
@@ -392,6 +447,40 @@ public class JiveTest {
     }
 
     @Test
+    public void testOmit() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3);
+
+        ObjectNode obj2 = Jive.omit(obj1, "key1", "key2", "key3");
+        ObjectNode obj3 = Jive.omit(obj1, new HashSet<>(Arrays.asList("key2", "key3")));
+
+        Assert.assertEquals(obj2.size(), 0);
+        Assert.assertEquals(obj3.size(), 1);
+        Assert.assertEquals(obj3.path("key1"), IntNode.valueOf(1));
+    }
+
+    @Test
+    public void testPick() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3);
+
+        ObjectNode obj2 = Jive.pick(obj1, "key1", "key2", "key3");
+        ObjectNode obj3 = Jive.pick(obj1, new HashSet<>(Arrays.asList("key2", "key3")));
+
+        Assert.assertEquals(obj2.size(), 3);
+        Assert.assertEquals(obj3.size(), 2);
+        Assert.assertEquals(obj2.path("key1"), IntNode.valueOf(1));
+        Assert.assertEquals(obj2.path("key2"), IntNode.valueOf(2));
+        Assert.assertEquals(obj2.path("key3"), IntNode.valueOf(3));
+        Assert.assertEquals(obj3.path("key2"), IntNode.valueOf(2));
+        Assert.assertEquals(obj3.path("key3"), IntNode.valueOf(3));
+    }
+
+    @Test
     public void testReduceArrayNode() {
         ArrayNode arr1 = arrayNode()
                 .add(1).add(2).add(3);
@@ -502,6 +591,23 @@ public class JiveTest {
 
         Assert.assertEquals(arr3, arrayNode().add(1).add(2).add(3));
         Assert.assertEquals(arr4, arrayNode());
+    }
+
+    @Test
+    public void testValues() {
+        ObjectNode obj1 = objectNode()
+                .put("key1", 1)
+                .put("key2", 2)
+                .put("key3", 3)
+                .put("key4", "4")
+                .put("key5", "5");
+
+        ArrayNode values = arrayNode()
+                .add(1).add(2).add(3).add("4").add("5");
+
+        ArrayNode result = Jive.values(obj1);
+
+        Assert.assertEquals(result, values);
     }
 
     private ArrayNode arrayNode() {

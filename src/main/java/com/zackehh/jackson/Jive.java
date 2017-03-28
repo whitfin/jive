@@ -8,11 +8,9 @@ import com.zackehh.jackson.scope.SafeExecution;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -185,6 +183,17 @@ public class Jive {
     }
 
     /**
+     * Returns an Set of Strings instance containing all keys of
+     * the provided ObjectNode.
+     *
+     * @param node the ObjectNode to retrieve keys for.
+     * @return a Set containing all keys.
+     */
+    public static Set<String> keys(ObjectNode node) {
+        return stream(node).map(Map.Entry::getKey).collect(Collectors.toSet());
+    }
+
+    /**
      * Retrieves the last value in an ArrayNode.
      *
      * If the ArrayNode is empty, a MissingNode instance
@@ -223,6 +232,19 @@ public class Jive {
      */
     public static ObjectNode map(ObjectNode node, Function<Map.Entry<String, JsonNode>, Map.Entry<String, JsonNode>> function) {
         return transform(node, s -> s.map(function));
+    }
+
+    /**
+     * Performs a shallow merge of multiple ObjectNodes.
+     *
+     * This is not a recursive merge, it will just overwrite the value
+     * on the left in case of a clash.
+     *
+     * @param nodes the ObjectNode instances to merge.
+     * @return a new ObjectNode instance of merged keys.
+     */
+    public static ObjectNode merge(ObjectNode... nodes) {
+        return objectCollect(Arrays.stream(nodes).flatMap(Jive::stream));
     }
 
     /**
@@ -555,6 +577,54 @@ public class Jive {
     }
 
     /**
+     * Returns an ObjectNode instance without the provided list
+     * of keys using the provided ObjectNode instance.
+     *
+     * @param node the ObjectNode to omit from.
+     * @param keys the keys to omit.
+     * @return an ObjectNode without the omitted fields.
+     */
+    public static ObjectNode omit(ObjectNode node, String... keys) {
+        return omit(node, new HashSet<>(Arrays.asList(keys)));
+    }
+
+    /**
+     * Returns an ObjectNode instance without the provided list
+     * of keys using the provided ObjectNode instance.
+     *
+     * @param node the ObjectNode to omit from.
+     * @param keys the keys to omit.
+     * @return an ObjectNode without the omitted fields.
+     */
+    public static ObjectNode omit(ObjectNode node, Collection<String> keys) {
+        return reject(node, e -> keys.contains(e.getKey()));
+    }
+
+    /**
+     * Returns an ObjectNode instance created from the provided list
+     * of keys using the provided ObjectNode instance.
+     *
+     * @param node the ObjectNode to pick from.
+     * @param keys the keys to pick.
+     * @return an ObjectNode containing the picked fields.
+     */
+    public static ObjectNode pick(ObjectNode node, String... keys) {
+        return pick(node, new HashSet<>(Arrays.asList(keys)));
+    }
+
+    /**
+     * Returns an ObjectNode instance created from the provided Set
+     * of keys using the provided ObjectNode instance.
+     *
+     * @param node the ObjectNode to pick from.
+     * @param keys the keys to pick.
+     * @return an ObjectNode containing the picked fields.
+     */
+    public static ObjectNode pick(ObjectNode node, Collection<String> keys) {
+        return filter(node, e -> keys.contains(e.getKey()));
+    }
+
+    /**
      * Reduces an ArrayNode into a single value of type T using
      * the provided function to accumulate values.
      *
@@ -596,7 +666,7 @@ public class Jive {
      * @return an ArrayNode instance containing filtered values.
      */
     public static ArrayNode reject(ArrayNode node, Predicate<JsonNode> predicate) {
-        return transform(node, s -> s.filter(e -> !predicate.test(e)));
+        return filter(node, e -> !predicate.test(e));
     }
 
     /**
@@ -613,7 +683,7 @@ public class Jive {
      * @return an ObjectNode instance containing filtered values.
      */
     public static ObjectNode reject(ObjectNode node, Predicate<Map.Entry<String, JsonNode>> predicate) {
-        return transform(node, s -> s.filter(e -> !predicate.test(e)));
+        return filter(node, e -> !predicate.test(e));
     }
 
     /**
@@ -720,6 +790,19 @@ public class Jive {
      */
     public static ArrayNode uniq(ArrayNode node) {
         return transform(node, Stream::distinct);
+    }
+
+    /**
+     * Returns an ArrayNode instance containing all values of
+     * the provided ObjectNode.
+     *
+     * Note that the returned values are in no guaranteed order.
+     *
+     * @param node the ObjectNode to retrieve values for.
+     * @return an ArrayNode containing all JsonNode values.
+     */
+    public static ArrayNode values(ObjectNode node) {
+        return arrayCollect(stream(node).map(Map.Entry::getValue));
     }
 
     /**
