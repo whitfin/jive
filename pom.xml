@@ -6,12 +6,12 @@
 
     <groupId>com.zackehh</groupId>
     <artifactId>jive</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Jive</name>
     <description>
-        Java utility library for working with Jackson JSON.
+        Java utility library for working with Jackson JSON w/ Stream support
     </description>
     <url>https://github.com/zackehh/jive</url>
 
