@@ -50,6 +50,7 @@
     </distributionManagement>
 
     <properties>
+        <findbugs.version>3.0.2</findbugs.version>
         <jackson.version>2.8.7</jackson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -64,6 +65,11 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>${findbugs.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

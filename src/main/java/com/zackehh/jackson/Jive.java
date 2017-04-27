@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.*;
 import com.zackehh.jackson.scope.SafeExecution;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -16,6 +18,7 @@ import java.util.stream.StreamSupport;
 
 import static com.zackehh.jackson.stream.JiveCollectors.toArrayNode;
 import static com.zackehh.jackson.stream.JiveCollectors.toObjectNode;
+import static java.util.Objects.requireNonNull;
 
 /**
  * The Jive class provides various utilities for working with Jackson
@@ -305,8 +308,8 @@ public class Jive {
      * @param value the BigDecimal value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, BigDecimal value) {
-        return newJsonEntry(key, newJsonNode(value));
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, @Nonnull BigDecimal value) {
+        return newJsonEntry(key, newJsonNode(requireNonNull(value)));
     }
 
     /**
@@ -316,8 +319,8 @@ public class Jive {
      * @param value the BigInteger value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, BigInteger value) {
-        return newJsonEntry(key, newJsonNode(value));
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, @Nonnull BigInteger value) {
+        return newJsonEntry(key, newJsonNode(requireNonNull(value)));
     }
 
     /**
@@ -327,7 +330,7 @@ public class Jive {
      * @param value the Boolean value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Boolean value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, boolean value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -349,7 +352,7 @@ public class Jive {
      * @param value the Double value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Double value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, double value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -360,7 +363,7 @@ public class Jive {
      * @param value the Float value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Float value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, float value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -371,7 +374,7 @@ public class Jive {
      * @param value the Integer value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Integer value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, int value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -382,18 +385,7 @@ public class Jive {
      * @param value the Long value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Long value) {
-        return newJsonEntry(key, newJsonNode(value));
-    }
-
-    /**
-     * Constructs a new JSON Map.Entry from an Object value.
-     *
-     * @param key the key of this entry as a String.
-     * @param value the Object value of this entry.
-     * @return a new Map.Entry instance.
-     */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Object value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, long value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -404,7 +396,7 @@ public class Jive {
      * @param value the Short value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Short value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, short value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -415,8 +407,8 @@ public class Jive {
      * @param value the String value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, String value) {
-        return newJsonEntry(key, newJsonNode(value));
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, @Nonnull String value) {
+        return newJsonEntry(key, newJsonNode(requireNonNull(value)));
     }
 
     /**
@@ -425,8 +417,8 @@ public class Jive {
      * @param value the BigDecimal value of this entry.
      * @return a new JsonNode instance.
      */
-    public static DecimalNode newJsonNode(BigDecimal value){
-        return DecimalNode.valueOf(value);
+    public static DecimalNode newJsonNode(@Nonnull BigDecimal value) {
+        return DecimalNode.valueOf(requireNonNull(value));
     }
 
     /**
@@ -435,8 +427,8 @@ public class Jive {
      * @param value the BigInteger value of this entry.
      * @return a new JsonNode instance.
      */
-    public static BigIntegerNode newJsonNode(BigInteger value){
-        return BigIntegerNode.valueOf(value);
+    public static BigIntegerNode newJsonNode(@Nonnull BigInteger value) {
+        return BigIntegerNode.valueOf(requireNonNull(value));
     }
 
     /**
@@ -445,7 +437,7 @@ public class Jive {
      * @param value the Boolean value of this entry.
      * @return a new JsonNode instance.
      */
-    public static BooleanNode newJsonNode(Boolean value){
+    public static BooleanNode newJsonNode(boolean value) {
         return BooleanNode.valueOf(value);
     }
 
@@ -455,7 +447,7 @@ public class Jive {
      * @param value the byte[] value of this entry.
      * @return a new JsonNode instance.
      */
-    public static BinaryNode newJsonNode(byte[] value){
+    public static BinaryNode newJsonNode(byte[] value) {
         return BinaryNode.valueOf(value);
     }
 
@@ -465,7 +457,7 @@ public class Jive {
      * @param value the Double value of this entry.
      * @return a new JsonNode instance.
      */
-    public static DoubleNode newJsonNode(Double value){
+    public static DoubleNode newJsonNode(double value) {
         return DoubleNode.valueOf(value);
     }
 
@@ -475,7 +467,7 @@ public class Jive {
      * @param value the Float value of this entry.
      * @return a new JsonNode instance.
      */
-    public static FloatNode newJsonNode(Float value){
+    public static FloatNode newJsonNode(float value) {
         return FloatNode.valueOf(value);
     }
 
@@ -485,7 +477,7 @@ public class Jive {
      * @param value the Integer value of this entry.
      * @return a new JsonNode instance.
      */
-    public static IntNode newJsonNode(Integer value){
+    public static IntNode newJsonNode(int value) {
         return IntNode.valueOf(value);
     }
 
@@ -495,18 +487,8 @@ public class Jive {
      * @param value the Long value of this entry.
      * @return a new JsonNode instance.
      */
-    public static LongNode newJsonNode(Long value){
+    public static LongNode newJsonNode(long value) {
         return LongNode.valueOf(value);
-    }
-
-    /**
-     * Constructs a new JsonNode from an Object value.
-     *
-     * @param value the Object value of this entry.
-     * @return a new JsonNode instance.
-     */
-    public static POJONode newJsonNode(Object value) {
-        return new POJONode(value);
     }
 
     /**
@@ -515,7 +497,7 @@ public class Jive {
      * @param value the Short value of this entry.
      * @return a new JsonNode instance.
      */
-    public static ShortNode newJsonNode(Short value){
+    public static ShortNode newJsonNode(short value) {
         return ShortNode.valueOf(value);
     }
 
@@ -525,8 +507,8 @@ public class Jive {
      * @param value the String value of this entry.
      * @return a new JsonNode instance.
      */
-    public static TextNode newJsonNode(String value){
-        return TextNode.valueOf(value);
+    public static TextNode newJsonNode(@Nonnull String value) {
+        return TextNode.valueOf(requireNonNull(value));
     }
 
     /**
