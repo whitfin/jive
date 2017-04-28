@@ -128,7 +128,7 @@ public class Jive {
     public static <T> Optional<T> execute(ObjectMapper mapper, SafeExecution<T> execution) {
         try {
             return Optional.ofNullable(execution.apply(mapper));
-        } catch(IOException e) {
+        } catch(Exception e) {
             return Optional.empty();
         }
     }

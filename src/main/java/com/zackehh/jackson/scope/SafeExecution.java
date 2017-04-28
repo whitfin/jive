@@ -22,5 +22,5 @@ public interface SafeExecution<T> {
      * @return an instance of the defined custom type.
      * @throws IOException if an error occurs in the Jackson operation.
      */
-    T apply(ObjectMapper mapper) throws IOException;
+    T apply(ObjectMapper mapper) throws Exception;
 }
