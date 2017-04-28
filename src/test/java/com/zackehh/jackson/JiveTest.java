@@ -336,8 +336,9 @@ public class JiveTest {
         Float val7 = 1.1f;
         Integer val8 = 1;
         Long val9 = 1L;
-        Short val10 = Short.valueOf("1");
-        String val11 = "hello";
+        Object val10 = new HashMap<>();
+        Short val11 = Short.valueOf("1");
+        String val12 = "hello";
 
         JsonNode node1  = Jive.newJsonNode(val1);
         JsonNode node2  = Jive.newJsonNode(val2);
@@ -350,6 +351,7 @@ public class JiveTest {
         JsonNode node9  = Jive.newJsonNode(val9);
         JsonNode node10 = Jive.newJsonNode(val10);
         JsonNode node11 = Jive.newJsonNode(val11);
+        JsonNode node12 = Jive.newJsonNode(val12);
 
         Assert.assertEquals(node1,  DecimalNode.valueOf(val1));
         Assert.assertEquals(node2,  BigIntegerNode.valueOf(val2));
@@ -360,8 +362,9 @@ public class JiveTest {
         Assert.assertEquals(node7,  FloatNode.valueOf(val7));
         Assert.assertEquals(node8,  IntNode.valueOf(val8));
         Assert.assertEquals(node9,  LongNode.valueOf(val9));
-        Assert.assertEquals(node10, ShortNode.valueOf(val10));
-        Assert.assertEquals(node11, TextNode.valueOf(val11));
+        Assert.assertEquals(node10, new POJONode(val10));
+        Assert.assertEquals(node11, ShortNode.valueOf(val11));
+        Assert.assertEquals(node12, TextNode.valueOf(val12));
     }
 
     @Test
@@ -375,7 +378,7 @@ public class JiveTest {
         JsonNode node7  = Jive.newJsonNode((Integer) null);
         JsonNode node8  = Jive.newJsonNode((Object) null);
         JsonNode node9  = Jive.newJsonNode((Long) null);
-        JsonNode node10  = Jive.newJsonNode((Short) null);
+        JsonNode node10 = Jive.newJsonNode((Short) null);
         JsonNode node11 = Jive.newJsonNode((String) null);
 
         Assert.assertTrue(node1.isNull());
@@ -403,8 +406,9 @@ public class JiveTest {
         Float val7 = 1.1f;
         Integer val8 = 1;
         Long val9 = 1L;
-        Short val10 = Short.valueOf("1");
-        String val11 = "hello";
+        Object val10 = new HashMap<>();
+        Short val11 = Short.valueOf("1");
+        String val12 = "hello";
 
         Map.Entry<String, JsonNode> node1  = Jive.newJsonEntry("key", val1);
         Map.Entry<String, JsonNode> node2  = Jive.newJsonEntry("key", val2);
@@ -417,6 +421,7 @@ public class JiveTest {
         Map.Entry<String, JsonNode> node9  = Jive.newJsonEntry("key", val9);
         Map.Entry<String, JsonNode> node10 = Jive.newJsonEntry("key", val10);
         Map.Entry<String, JsonNode> node11 = Jive.newJsonEntry("key", val11);
+        Map.Entry<String, JsonNode> node12 = Jive.newJsonEntry("key", val12);
 
         Assert.assertEquals(node1,  new AbstractMap.SimpleEntry<>("key", DecimalNode.valueOf(val1)));
         Assert.assertEquals(node2,  new AbstractMap.SimpleEntry<>("key", BigIntegerNode.valueOf(val2)));
@@ -427,8 +432,9 @@ public class JiveTest {
         Assert.assertEquals(node7,  new AbstractMap.SimpleEntry<>("key", FloatNode.valueOf(val7)));
         Assert.assertEquals(node8,  new AbstractMap.SimpleEntry<>("key", IntNode.valueOf(val8)));
         Assert.assertEquals(node9,  new AbstractMap.SimpleEntry<>("key", LongNode.valueOf(val9)));
-        Assert.assertEquals(node10, new AbstractMap.SimpleEntry<>("key", ShortNode.valueOf(val10)));
-        Assert.assertEquals(node11, new AbstractMap.SimpleEntry<>("key", TextNode.valueOf(val11)));
+        Assert.assertEquals(node10, new AbstractMap.SimpleEntry<>("key", new POJONode(val10)));
+        Assert.assertEquals(node11, new AbstractMap.SimpleEntry<>("key", ShortNode.valueOf(val11)));
+        Assert.assertEquals(node12, new AbstractMap.SimpleEntry<>("key", TextNode.valueOf(val12)));
     }
 
     @Test
@@ -561,6 +567,18 @@ public class JiveTest {
                 .put("key5", "5");
 
         Assert.assertEquals(obj2, obj3);
+    }
+
+    @Test
+    public void testRightOperator() {
+        Jive.RightOperator<JsonNode> operator = new Jive.RightOperator<>();
+
+        JsonNode left  = Jive.newTextNode("test");
+        JsonNode right = Jive.newIntNode(5);
+
+        JsonNode result = operator.apply(left, right);
+
+        Assert.assertEquals(result, right);
     }
 
     @Test

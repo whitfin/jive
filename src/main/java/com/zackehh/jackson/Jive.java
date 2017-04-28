@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -439,8 +440,8 @@ public class Jive {
      * @param value the BigDecimal value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, @Nonnull BigDecimal value) {
-        return newJsonEntry(key, newJsonNode(requireNonNull(value)));
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, BigDecimal value) {
+        return newJsonEntry(key, newJsonNode(value));
     }
 
     /**
@@ -450,8 +451,8 @@ public class Jive {
      * @param value the BigInteger value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, @Nonnull BigInteger value) {
-        return newJsonEntry(key, newJsonNode(requireNonNull(value)));
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, BigInteger value) {
+        return newJsonEntry(key, newJsonNode(value));
     }
 
     /**
@@ -461,7 +462,7 @@ public class Jive {
      * @param value the Boolean value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, boolean value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Boolean value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -483,7 +484,7 @@ public class Jive {
      * @param value the Double value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, double value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Double value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -494,7 +495,7 @@ public class Jive {
      * @param value the Float value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, float value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Float value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -505,7 +506,7 @@ public class Jive {
      * @param value the Integer value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, int value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Integer value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -516,7 +517,18 @@ public class Jive {
      * @param value the Long value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, long value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Long value) {
+        return newJsonEntry(key, newJsonNode(value));
+    }
+
+    /**
+     * Constructs a new JSON Map.Entry from an Object value.
+     *
+     * @param key the key of this entry as a String.
+     * @param value the Object value of this entry.
+     * @return a new Map.Entry instance.
+     */
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Object value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -527,7 +539,7 @@ public class Jive {
      * @param value the Short value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, short value) {
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, Short value) {
         return newJsonEntry(key, newJsonNode(value));
     }
 
@@ -538,8 +550,8 @@ public class Jive {
      * @param value the String value of this entry.
      * @return a new Map.Entry instance.
      */
-    public static Map.Entry<String, JsonNode> newJsonEntry(String key, @Nonnull String value) {
-        return newJsonEntry(key, newJsonNode(requireNonNull(value)));
+    public static Map.Entry<String, JsonNode> newJsonEntry(String key, String value) {
+        return newJsonEntry(key, newJsonNode(value));
     }
 
     /**
@@ -758,7 +770,7 @@ public class Jive {
      * @return a new instance of type T.
      */
     public static <T> T reduce(ArrayNode node, T initial, BiFunction<T, JsonNode, T> function) {
-        return stream(node).reduce(initial, function, (l, r) -> r);
+        return stream(node).reduce(initial, function, new RightOperator<>());
     }
 
     /**
@@ -772,7 +784,7 @@ public class Jive {
      * @return a new instance of type T.
      */
     public static <T> T reduce(ObjectNode node, T initial, BiFunction<T, Map.Entry<String, JsonNode>, T> function) {
-        return stream(node).reduce(initial, function, (l, r) -> r);
+        return stream(node).reduce(initial, function, new RightOperator<>());
     }
 
     /**
@@ -960,6 +972,26 @@ public class Jive {
      */
     private static <T> JsonNode safeNode(T value, Function<T, JsonNode> mapper) {
         return value == null ? NullNode.getInstance() : mapper.apply(value);
+    }
+
+    /**
+     * Internal BinaryOperator implementation for reduction methods.
+     *
+     * @param <T> the type of the values.
+     */
+    static class RightOperator<T> implements BinaryOperator<T> {
+
+        /**
+         * Overwrites the left value with the right value.
+         *
+         * @param left the left value (ignored).
+         * @param right the right value (returned).
+         * @return the value on the right side.
+         */
+        @Override
+        public T apply(T left, T right) {
+            return right;
+        }
     }
 
 }
