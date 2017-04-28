@@ -2,16 +2,37 @@ package com.zackehh.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.*;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BigIntegerNode;
+import com.fasterxml.jackson.databind.node.BinaryNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.DecimalNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.FloatNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.LongNode;
+import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.POJONode;
+import com.fasterxml.jackson.databind.node.ShortNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.zackehh.jackson.scope.SafeExecution;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
-import java.util.function.*;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -273,6 +294,116 @@ public class Jive {
     }
 
     /**
+     * Constructs a new BigIntegerNode from a BigDecimal value.
+     *
+     * @param value the BigIntegerNode value of this entry.
+     * @return a new BigIntegerNode instance.
+     */
+    public static BigIntegerNode newBigIntegerNode(@Nonnull BigInteger value) {
+        return BigIntegerNode.valueOf(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new DecimalNode from a BigDecimal value.
+     *
+     * @param value the BigDecimal value of this entry.
+     * @return a new DecimalNode instance.
+     */
+    public static DecimalNode newDecimalNode(@Nonnull BigDecimal value) {
+        return DecimalNode.valueOf(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new BooleanNode from a Boolean value.
+     *
+     * @param value the Boolean value of this entry.
+     * @return a new BooleanNode instance.
+     */
+    public static BooleanNode newBooleanNode(@Nonnull Boolean value) {
+        return BooleanNode.valueOf(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new BinaryNode from a byte[] value.
+     *
+     * @param value the byte[] value of this entry.
+     * @return a new BinaryNode instance.
+     */
+    public static BinaryNode newBinaryNode(@Nonnull byte[] value) {
+        return BinaryNode.valueOf(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new DoubleNode from a Double value.
+     *
+     * @param value the Double value of this entry.
+     * @return a new DoubleNode instance.
+     */
+    public static DoubleNode newDoubleNode(@Nonnull Double value) {
+        return DoubleNode.valueOf(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new FloatNode from a Float value.
+     *
+     * @param value the Float value of this entry.
+     * @return a new FloatNode instance.
+     */
+    public static FloatNode newFloatNode(@Nonnull Float value) {
+        return FloatNode.valueOf(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new IntNode from an Integer value.
+     *
+     * @param value the Integer value of this entry.
+     * @return a new IntNode instance.
+     */
+    public static IntNode newIntNode(@Nonnull Integer value) {
+        return IntNode.valueOf(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new LongNode from a Long value.
+     *
+     * @param value the Long value of this entry.
+     * @return a new LongNode instance.
+     */
+    public static LongNode newLongNode(@Nonnull Long value) {
+        return LongNode.valueOf(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new POJONode from an Object value.
+     *
+     * @param value the Object value of this entry.
+     * @return a new POJONode instance.
+     */
+    public static POJONode newPojoNode(@Nonnull Object value) {
+        return new POJONode(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new ShortNode from a Short value.
+     *
+     * @param value the Short value of this entry.
+     * @return a new ShortNode instance.
+     */
+    public static ShortNode newShortNode(@Nonnull Short value) {
+        return ShortNode.valueOf(requireNonNull(value));
+    }
+
+    /**
+     * Constructs a new TextNode from a String value.
+     *
+     * @param value the String value of this entry.
+     * @return a new TextNode instance.
+     */
+    public static TextNode newTextNode(@Nonnull String value) {
+        return TextNode.valueOf(requireNonNull(value));
+    }
+
+    /**
      * Constructs a new Iterable of type JsonNode using the provided
      * input.
      *
@@ -417,8 +548,8 @@ public class Jive {
      * @param value the BigDecimal value of this entry.
      * @return a new JsonNode instance.
      */
-    public static DecimalNode newJsonNode(@Nonnull BigDecimal value) {
-        return DecimalNode.valueOf(requireNonNull(value));
+    public static JsonNode newJsonNode(BigDecimal value) {
+        return safeNode(value, Jive::newDecimalNode);
     }
 
     /**
@@ -427,8 +558,8 @@ public class Jive {
      * @param value the BigInteger value of this entry.
      * @return a new JsonNode instance.
      */
-    public static BigIntegerNode newJsonNode(@Nonnull BigInteger value) {
-        return BigIntegerNode.valueOf(requireNonNull(value));
+    public static JsonNode newJsonNode(BigInteger value) {
+        return safeNode(value, Jive::newBigIntegerNode);
     }
 
     /**
@@ -437,8 +568,8 @@ public class Jive {
      * @param value the Boolean value of this entry.
      * @return a new JsonNode instance.
      */
-    public static BooleanNode newJsonNode(boolean value) {
-        return BooleanNode.valueOf(value);
+    public static JsonNode newJsonNode(Boolean value) {
+        return safeNode(value, Jive::newBooleanNode);
     }
 
     /**
@@ -447,8 +578,8 @@ public class Jive {
      * @param value the byte[] value of this entry.
      * @return a new JsonNode instance.
      */
-    public static BinaryNode newJsonNode(byte[] value) {
-        return BinaryNode.valueOf(value);
+    public static JsonNode newJsonNode(byte[] value) {
+        return safeNode(value, Jive::newBinaryNode);
     }
 
     /**
@@ -457,8 +588,8 @@ public class Jive {
      * @param value the Double value of this entry.
      * @return a new JsonNode instance.
      */
-    public static DoubleNode newJsonNode(double value) {
-        return DoubleNode.valueOf(value);
+    public static JsonNode newJsonNode(Double value) {
+        return safeNode(value, Jive::newDoubleNode);
     }
 
     /**
@@ -467,8 +598,8 @@ public class Jive {
      * @param value the Float value of this entry.
      * @return a new JsonNode instance.
      */
-    public static FloatNode newJsonNode(float value) {
-        return FloatNode.valueOf(value);
+    public static JsonNode newJsonNode(Float value) {
+        return safeNode(value, Jive::newFloatNode);
     }
 
     /**
@@ -477,8 +608,8 @@ public class Jive {
      * @param value the Integer value of this entry.
      * @return a new JsonNode instance.
      */
-    public static IntNode newJsonNode(int value) {
-        return IntNode.valueOf(value);
+    public static JsonNode newJsonNode(Integer value) {
+        return safeNode(value, Jive::newIntNode);
     }
 
     /**
@@ -487,8 +618,18 @@ public class Jive {
      * @param value the Long value of this entry.
      * @return a new JsonNode instance.
      */
-    public static LongNode newJsonNode(long value) {
-        return LongNode.valueOf(value);
+    public static JsonNode newJsonNode(Long value) {
+        return safeNode(value, Jive::newLongNode);
+    }
+
+    /**
+     * Constructs a new JsonNode from an Object value.
+     *
+     * @param value the Object value of this entry.
+     * @return a new JsonNode instance.
+     */
+    public static JsonNode newJsonNode(Object value) {
+        return safeNode(value, Jive::newPojoNode);
     }
 
     /**
@@ -497,8 +638,8 @@ public class Jive {
      * @param value the Short value of this entry.
      * @return a new JsonNode instance.
      */
-    public static ShortNode newJsonNode(short value) {
-        return ShortNode.valueOf(value);
+    public static JsonNode newJsonNode(Short value) {
+        return safeNode(value, Jive::newShortNode);
     }
 
     /**
@@ -507,8 +648,8 @@ public class Jive {
      * @param value the String value of this entry.
      * @return a new JsonNode instance.
      */
-    public static TextNode newJsonNode(@Nonnull String value) {
-        return TextNode.valueOf(requireNonNull(value));
+    public static JsonNode newJsonNode(String value) {
+        return safeNode(value, Jive::newTextNode);
     }
 
     /**
@@ -805,6 +946,20 @@ public class Jive {
      */
     private static ObjectNode objectCollect(Stream<Map.Entry<String, JsonNode>> stream) {
         return stream.collect(toObjectNode());
+    }
+
+    /**
+     * Safely converts a value to a JsonNode instance.
+     *
+     * If the value is null, a NullNode will be returned.
+     *
+     * @param value the value to convert.
+     * @param mapper the mapping Function to convert with.
+     * @param <T> the type of the value to convert.
+     * @return a new JsonNode instance.
+     */
+    private static <T> JsonNode safeNode(T value, Function<T, JsonNode> mapper) {
+        return value == null ? NullNode.getInstance() : mapper.apply(value);
     }
 
 }

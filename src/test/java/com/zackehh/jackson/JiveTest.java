@@ -365,6 +365,34 @@ public class JiveTest {
     }
 
     @Test
+    public void testNewJsonNodeWithNulls() {
+        JsonNode node1  = Jive.newJsonNode((BigDecimal) null);
+        JsonNode node2  = Jive.newJsonNode((BigInteger) null);
+        JsonNode node3  = Jive.newJsonNode((Boolean) null);
+        JsonNode node4  = Jive.newJsonNode((byte[]) null);
+        JsonNode node5  = Jive.newJsonNode((Double) null);
+        JsonNode node6  = Jive.newJsonNode((Float) null);
+        JsonNode node7  = Jive.newJsonNode((Integer) null);
+        JsonNode node8  = Jive.newJsonNode((Object) null);
+        JsonNode node9  = Jive.newJsonNode((Long) null);
+        JsonNode node10  = Jive.newJsonNode((Short) null);
+        JsonNode node11 = Jive.newJsonNode((String) null);
+
+        Assert.assertTrue(node1.isNull());
+        Assert.assertTrue(node2.isNull());
+        Assert.assertTrue(node3.isNull());
+        Assert.assertTrue(node1.isNull());
+        Assert.assertTrue(node4.isNull());
+        Assert.assertTrue(node5.isNull());
+        Assert.assertTrue(node6.isNull());
+        Assert.assertTrue(node7.isNull());
+        Assert.assertTrue(node8.isNull());
+        Assert.assertTrue(node9.isNull());
+        Assert.assertTrue(node10.isNull());
+        Assert.assertTrue(node11.isNull());
+    }
+
+    @Test
     public void testNewJsonEntry() {
         BigDecimal val1 = BigDecimal.valueOf(50);
         BigInteger val2 = BigInteger.valueOf(50);
