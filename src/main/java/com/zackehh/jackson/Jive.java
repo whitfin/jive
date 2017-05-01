@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.zackehh.jackson.scope.SafeExecution;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractMap;
@@ -30,6 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -110,9 +110,32 @@ public class Jive {
     }
 
     /**
-     * Executes a scoped function with the provided ObjectMapper.
+     * Executes a scoped function with caught Exceptions.
      *
      * Any thrown IOException instances will be caught and will
+     * return an empty Optional to the user. In the case of a
+     * successful execution, the return value of the called block
+     * will be wrapped into an Optional and returned.
+     *
+     * This function can be used to remove the need to manually
+     * handle exceptions when calling ObjectMapper functions.
+     *
+     * @param execution the execution implementation to call.
+     * @param <T> the type of the block return value.
+     * @return an Optional containing a potential result.
+     */
+    public static <T> Optional<T> execute(Callable<T> execution) {
+        try {
+            return Optional.ofNullable(execution.call());
+        } catch(Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Executes a scoped function with the provided ObjectMapper.
+     *
+     * Any thrown Exception instances will be caught and will
      * return an empty Optional to the user. In the case of a
      * successful execution, the return value of the called block
      * will be wrapped into an Optional and returned.
@@ -126,11 +149,7 @@ public class Jive {
      * @return an Optional containing a potential result.
      */
     public static <T> Optional<T> execute(ObjectMapper mapper, SafeExecution<T> execution) {
-        try {
-            return Optional.ofNullable(execution.apply(mapper));
-        } catch(Exception e) {
-            return Optional.empty();
-        }
+        return execute(() -> execution.apply(mapper));
     }
 
     /**
