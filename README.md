@@ -16,7 +16,7 @@ Jive also offers stream utilities for `ArrayNode` and `ObjectNode` instances, al
 <dependency>
     <groupId>com.zackehh</groupId>
     <artifactId>jive</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 
